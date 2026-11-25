@@ -47,7 +47,7 @@
         name: mongodb-mongosh
         state: present
     - name: get the categories count
-      ansible.builtin.command: mongosh --host mongodb.satyadaws.online --quiet --eval 'db=db.getSiblingDB("catalogue");db.products.count()'
+      ansible.builtin.command: mongosh --host mongodb.satyadaws.online --quiet --eval 'db=db.getSiblingDB("catalogue");db.products.countDocuments()'
       register: product_count
     - name: print the count 
       ansible.builtin.debug:
