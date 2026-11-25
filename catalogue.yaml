@@ -1,0 +1,10 @@
+- name: catalogue
+  hosts: catalogue
+  become: yes
+  tasks:
+    - name: Disable current module # if module is not available then use shell cmd using ansible.builtin.command
+      ansible.builtin.command: dnf module disable nodejs -y ; dnf module enable nodejs:20 -y
+    - name: Install NodeJS
+      ansible.builtin.package:
+        name: nodejs 
+        state: present
