@@ -49,9 +49,14 @@
     - name: get the categories count
       ansible.builtin.command: mongosh --host mongodb.satyadaws.online --quiet --eval 'db=db.getSiblingDB("catalogue");db.products.countDocuments()'
       register: product_count
-    - name: print the count 
-      ansible.builtin.debug:
-        msg: "product count: {{product_count.stdout}}"
+    # - name: print the count 
+    #   ansible.builtin.debug:
+    #     msg: "product count: {{product_count.stdout}}"
     - name: load catalogue data 
       ansible.builtin.shell: mongosh --host mongodb.satyadaws.online < /app/db/master-data.js
-
+      when: product_count.stdout == 0
+    - name: Start and Enable catalogue Service
+      ansible.builtin.service:
+        name: catalogue
+        state: started
+        enabled: true
