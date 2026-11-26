@@ -48,11 +48,7 @@
     - name: Run daemon-reload only
       ansible.builtin.systemd_service:
         daemon_reload: true
-    - name: Start and Enable shipping Service
-      ansible.builtin.service:
-        name: shipping
-        state: started
-        enabled: true
+    
     - name: install mysql client
       ansible.builtin.package:
         name: mysql
@@ -72,4 +68,10 @@
         mysql -h mysql.satyadaws.online -uroot -p{{mysql_password}} < /app/db/app-user.sql
         mysql -h mysql.satyadaws.online -uroot -p{{mysql_password}} < /app/db/master-data.sql
         when: schema_output.stdout | int == 0 
+        
+    - name: Start and Enable shipping Service
+      ansible.builtin.service:
+        name: shipping
+        state: started
+        enabled: true
 
