@@ -1,0 +1,67 @@
+- name: shipping
+  hosts: shipping
+  become: yes
+  vars:
+    mysql_password: RoboShop@1
+
+  tasks:
+    - name: Install maven
+      ansible.builtin.package:
+        name: maven 
+        state: present
+    - name: create roboshop user
+      ansible.builtin.user:
+        name: roboshop
+      # remove a directory if already exists 
+    - name: Recursively remove app directory and its contents
+      ansible.builtin.file:
+        path: /app
+        state: absent
+    - name: create app directory
+      ansible.builtin.file:
+        path: /app 
+        state: directory # directory otherwise it will create a file
+    - name: Download the shipping application
+      ansible.builtin.get_url:
+        url: https://roboshop-artifacts.s3.amazonaws.com/shipping-v3.zip
+        dest: /tmp/shipping.zip
+    - name: unzip or extract shipping app
+      ansible.builtin.unarchive:
+        src: /tmp/shipping.zip
+        dest: /app
+        remote_src: yes
+    - name: install dependencies
+      ansible.builtin.command: mvn clean package
+      args:
+        chdir: /app 
+    - name: rename jar file
+      ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar 
+      args: 
+        chdir: /app
+        removes: target/shipping-1.0.jar
+        creates: shipping.jar
+    - name: Setup SystemD shipping Service
+      ansible.builtin.copy:
+        src: shipping.service
+        dest: /etc/systemd/system/shipping.service
+
+    - name: Run daemon-reload only
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+    - name: Start and Enable shipping Service
+      ansible.builtin.service:
+        name: shipping
+        state: started
+        enabled: true
+    - name: install mysql client
+      ansible.builtin.package:
+        name: mysql
+        state: present
+    # check data is already present or not
+    
+    - name: check cities schema exists or not
+      ansible.builtin.command: mysql -h mysql.satyadaws.online -uroot -p{{mysql_password}} -sN -e "SELECT COUNT(*) FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME='cities'"
+      register: schema
+    - name: print output
+      ansible.builtin.debug:
+        msg: "schema output: {{schema}}"
