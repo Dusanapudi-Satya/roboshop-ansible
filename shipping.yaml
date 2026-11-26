@@ -65,7 +65,7 @@
     - name: print output
       ansible.builtin.debug:
         msg: "schema output: {{schema}}"
-    - name: load cities data
-      ansible.builtin.command: mysql -h mysql.satyadaws.online -uroot -p{{mysql_password}} < /app/db/schema.sql
+    - name: load cities data # redirections (< redirect symbol) will work only with shell and it has access to env variables
+      ansible.builtin.shell: mysql -h mysql.satyadaws.online -uroot -p{{mysql_password}} < /app/db/schema.sql
       when: schema.stdout == "1" # returns 1 if db exists
 
